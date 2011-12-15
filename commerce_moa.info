@@ -1,0 +1,8 @@
+name = Commerce Minimum Order Amount
+description = Allow set mininum order amount in cart
+package = Commerce (Contrib)
+core = 7.x
+
+files[] = commerce_moa.module
+
+dependencies[] = commerce_cart
