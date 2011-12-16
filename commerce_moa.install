@@ -5,4 +5,5 @@
  */
 function commerce_moa_uninstall() {
   variable_del('commerce_minimum_order_amount');
+  variable_del('commerce_maximum_order_amount');
 }
