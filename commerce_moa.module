@@ -94,10 +94,10 @@ function commerce_moa_line_item_views_form_validate($form, &$form_state) {
   $minimum_value = (float) commerce_moa_default_minimum();
   $maximum_value = (float) commerce_moa_default_maximum();
 
-  if ($total < $minimum_value) {
+  if ($minimum_value > 0 && $total < $minimum_value) {
     form_set_error('order', t('This store requires minimum order of %minimum_amount %currency_code.', array('%minimum_amount' => $minimum_value, '%currency_code' => $balance['currency_code'])));
   }
-  if ($total > $maximum_value) {
+  if ($maximum_value > 0 && $total > $maximum_value) {
     form_set_error('order', t('This store requires maximum order of %maximum_amount %currency_code.', array('%maximum_amount' => $maximum_value, '%currency_code' => $balance['currency_code'])));
   }
 }
