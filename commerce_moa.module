@@ -47,6 +47,12 @@ function commerce_moa_settings_form($form, &$form_state) {
     '#description' => t('The default minimum order quantity. Ex: 2 if set 0 then disable'),
     '#default_value' => commerce_moa_default_quantity(),
   );
+  $form['commerce_minimum_currency_format'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Currency format'),
+    '#description' => t('The default currency format if checked: 10.00 USD, unchecked: $10.00'),
+    '#default_value' => commerce_moa_currency_format(),
+  );
 
   $form['#validate'] = array('commerce_moa_settings_form_validate');
 
@@ -91,6 +97,13 @@ function commerce_moa_default_quantity() {
 }
 
 /**
+ * Return default maximum order amount value, if set is 0 then disable
+ */
+function commerce_moa_currency_format() {
+  return variable_get('commerce_minimum_currency_format', 1);
+}
+
+/**
  * Implements hook_form_alter().
  */
 function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
@@ -99,10 +112,11 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
   $minimum_quantity = commerce_moa_default_quantity();
 
   if ($minimum_value > 0 || $maximum_value > 0) {
-    if (strpos($form_id, 'views_form_commerce_cart_form_') === 0) {
-      $form['actions']['checkout']['#validate'] = array_merge($form['#validate'], array('commerce_moa_checkout_form_validate'));
-    }
-    if ($form_id == 'commerce_checkout_form_checkout') {
+    if ($form_id == 'views_form_commerce_cart_form_default') {
+      $form['#validate'][] = 'commerce_moa_checkout_form_validate';
+    } elseif ($form_id == 'commerce_checkout_form_checkout') {
+      $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
+    } elseif ($form_id == 'commerce_checkout_form_review') {
       $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
     }
   }
@@ -115,10 +129,18 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
   $order = commerce_order_load($form_state['order']->order_id);
   $balance = commerce_payment_order_balance($order);
   $total = commerce_currency_amount_to_decimal($balance['amount'], $balance['currency_code']);
+  $minimum_quantity = commerce_moa_default_quantity();
   $minimum_value = (float) commerce_moa_default_minimum();
   $maximum_value = (float) commerce_moa_default_maximum();
-  $minimum_quantity = commerce_moa_default_quantity();
-  
+  //
+  if (1 == commerce_moa_currency_format()) {
+    $minimum_value_error = number_format(commerce_moa_default_minimum(), 2, '.', '') . ' ' . $balance['currency_code'];
+    $maximum_value_error = number_format(commerce_moa_default_maximum(), 2, '.', '') . ' ' . $balance['currency_code'];
+  } else {
+    $minimum_value_error = commerce_currency_get_symbol($balance['currency_code']) . number_format(commerce_moa_default_minimum(), 2, '.', '');
+    $maximum_value_error = commerce_currency_get_symbol($balance['currency_code']) . number_format(commerce_moa_default_maximum(), 2, '.', '');
+  }
+  //
   if ($minimum_quantity > 0) {
     $order_wrapper = entity_metadata_wrapper('commerce_order', $form_state['order']);
     $order_wrapper->commerce_line_items;
@@ -128,10 +150,11 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
       }
     }
   }
+  //
   if ($minimum_value > 0 && $total < $minimum_value) {
-    form_set_error('order', t('This store requires minimum order of %minimum_amount %currency_code.', array('%minimum_amount' => $minimum_value, '%currency_code' => $balance['currency_code'])));
+    form_set_error('order', t('This store requires minimum order of %minimum_amount.', array('%minimum_amount' => $minimum_value_error)));
   }
   if ($maximum_value > 0 && $total > $maximum_value) {
-    form_set_error('order', t('This store requires maximum order of %maximum_amount %currency_code.', array('%maximum_amount' => $maximum_value, '%currency_code' => $balance['currency_code'])));
+    form_set_error('order', t('This store requires maximum order of %maximum_amount.', array('%maximum_amount' => $maximum_value_error)));
   }
 }
