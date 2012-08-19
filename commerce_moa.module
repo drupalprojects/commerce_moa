@@ -113,7 +113,7 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
 
   if ($minimum_value > 0 || $maximum_value > 0) {
     if ($form_id == 'views_form_commerce_cart_form_default') {
-      $form['#validate'][] = 'commerce_moa_checkout_form_validate';
+      $form['actions']['checkout']['#validate'] = array_merge($form['#validate'], array('commerce_moa_checkout_form_validate'));
     } elseif ($form_id == 'commerce_checkout_form_checkout') {
       $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
     } elseif ($form_id == 'commerce_checkout_form_review') {
