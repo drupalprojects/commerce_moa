@@ -113,7 +113,7 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
 
   if ($minimum_value > 0 || $maximum_value > 0) {
     if ($form_id == 'views_form_commerce_cart_form_default') {
-      $form['actions']['checkout']['#validate'] = array_merge($form['#validate'], array('commerce_moa_checkout_form_validate'));
+      $form['actions']['checkout']['#validate'][] = 'commerce_moa_checkout_form_validate';
     } elseif ($form_id == 'commerce_checkout_form_checkout') {
       $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
     } elseif ($form_id == 'commerce_checkout_form_review') {
@@ -127,7 +127,7 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
  */
 function commerce_moa_checkout_form_validate($form, &$form_state) {
   $order = commerce_order_load($form_state['order']->order_id);
-  $balance = commerce_payment_order_balance($order);
+  $balance = $order->commerce_order_total['und'][0];
   $total = commerce_currency_amount_to_decimal($balance['amount'], $balance['currency_code']);
   $minimum_quantity = commerce_moa_default_quantity();
   $minimum_value = (float) commerce_moa_default_minimum();
