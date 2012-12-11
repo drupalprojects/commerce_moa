@@ -111,7 +111,7 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
   $maximum_value = (float) commerce_moa_default_maximum();
   $minimum_quantity = commerce_moa_default_quantity();
 
-  if ($minimum_value > 0 || $maximum_value > 0) {
+  if ($minimum_value > 0 || $maximum_value > 0 || $minimum_quantity > 0) {
     if ($form_id == 'views_form_commerce_cart_form_default') {
       $form['actions']['checkout']['#validate'][] = 'commerce_moa_checkout_form_validate';
     } elseif ($form_id == 'commerce_checkout_form_checkout') {
