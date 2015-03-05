@@ -72,7 +72,10 @@ function commerce_moa_settings_form($form, &$form_state) {
   $form['commerce_minimum_currency_format'] = array(
     '#type' => 'checkbox',
     '#title' => t('Currency format'),
-    '#description' => t('The default currency format if checked: 10.00 USD, unchecked: $10.00'),
+    '#description' => t('The default currency format if checked: !checked, unchecked: !unchecked', array(
+      '!checked' => commerce_moa_format_amount(10, commerce_default_currency(), TRUE),
+      '!unchecked' => commerce_moa_format_amount(10, commerce_default_currency(), FALSE),
+    )),
     '#default_value' => commerce_moa_currency_format(),
   );
 
@@ -149,19 +152,16 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
  */
 function commerce_moa_checkout_form_validate($form, &$form_state) {
   $order = commerce_order_load($form_state['order']->order_id);
-  $balance = $order->commerce_order_total['und'][0];
+  $balance = $order->commerce_order_total[LANGUAGE_NONE][0];
   $total = commerce_currency_amount_to_decimal($balance['amount'], $balance['currency_code']);
   $minimum_quantity = commerce_moa_default_quantity();
   $minimum_value = (float) commerce_moa_default_minimum();
   $maximum_value = (float) commerce_moa_default_maximum();
-  //
-  if (1 == commerce_moa_currency_format()) {
-    $minimum_value_error = number_format(commerce_moa_default_minimum(), 2, '.', '') . ' ' . $balance['currency_code'];
-    $maximum_value_error = number_format(commerce_moa_default_maximum(), 2, '.', '') . ' ' . $balance['currency_code'];
-  } else {
-    $minimum_value_error = commerce_currency_get_symbol($balance['currency_code']) . number_format(commerce_moa_default_minimum(), 2, '.', '');
-    $maximum_value_error = commerce_currency_get_symbol($balance['currency_code']) . number_format(commerce_moa_default_maximum(), 2, '.', '');
-  }
+
+  $use_custom_currency_format = commerce_moa_currency_format();
+  $minimum_value_error = commerce_moa_format_amount($minimum_value, $balance['currency_code'], $use_custom_currency_format);
+  $maximum_value_error = commerce_moa_format_amount($maximum_value, $balance['currency_code'], $use_custom_currency_format);
+
   // Check access quantity
   if (user_access('access quantity')) {
     if ($minimum_quantity > 0) {
@@ -188,4 +188,16 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
       form_set_error('order', t('This store requires maximum order of %maximum_amount.', array('%maximum_amount' => $maximum_value_error)));
     }
   }
+}
+
+function commerce_moa_format_amount($amount, $currency_code, $use_custom_currency_format) {
+  $result;
+  if ($use_custom_currency_format) {
+    $currency = commerce_currency_load($currency_code);
+    $result = number_format($amount, $currency['decimals'], $currency['decimal_separator'], $currency['thousands_separator']) . ' ' . $currency_code;
+  }
+  else {
+    $result = commerce_currency_format($amount, $currency_code, NULL, FALSE);
+  }
+  return $result;
 }
