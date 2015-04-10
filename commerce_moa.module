@@ -171,7 +171,7 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
         // Don't check quantity for shipping line item.
         $is_product = in_array($line_item_wrapper->type->value(), commerce_product_line_item_types());
         if ($is_product && intval($line_item_wrapper->quantity->value()) < $minimum_quantity) {
-          form_set_error('order', t('This store requires minimum quantity order of %minimum_quantity per item.', array('%minimum_quantity' => $minimum_quantity)));
+          form_set_error('order', t('This store requires minimum quantity order of !minimum_quantity per item.', array('!minimum_quantity' => $minimum_quantity)));
         }
       }
     }
@@ -179,13 +179,13 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
   // Check access minimum
   if (user_access('access minimum')) {
     if ($minimum_value > 0 && $total < $minimum_value) {
-      form_set_error('order', t('This store requires minimum order of %minimum_amount.', array('%minimum_amount' => $minimum_value_error)));
+      form_set_error('order', t('This store requires minimum order of !minimum_amount.', array('!minimum_amount' => $minimum_value_error)));
     }
   }
   // Check access maximum
   if (user_access('access maximum')) {
     if ($maximum_value > 0 && $total > $maximum_value) {
-      form_set_error('order', t('This store requires maximum order of %maximum_amount.', array('%maximum_amount' => $maximum_value_error)));
+      form_set_error('order', t('This store requires maximum order of !maximum_amount.', array('!maximum_amount' => $maximum_value_error)));
     }
   }
 }
