@@ -143,9 +143,11 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
   if ($minimum_value > 0 || $maximum_value > 0 || $minimum_quantity > 0) {
     if ($form_id == 'views_form_commerce_cart_form_default') {
       $form['actions']['checkout']['#validate'][] = 'commerce_moa_checkout_form_validate';
-    } elseif ($form_id == 'commerce_checkout_form_checkout') {
+    } 
+    elseif ($form_id == 'commerce_checkout_form_checkout') {
       $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
-    } elseif ($form_id == 'commerce_checkout_form_review') {
+    } 
+    elseif ($form_id == 'commerce_checkout_form_review') {
       $form['buttons']['continue']['#validate'][] = 'commerce_moa_checkout_form_validate';
     }
   }
@@ -180,13 +182,13 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
       }
     }
   }
-  // Check access minimum
+  // Check access minimum.
   if (user_access('access minimum')) {
     if ($minimum_value > 0 && $total < $minimum_value) {
       form_set_error('order', t('This store requires minimum order of !minimum_amount.', array('!minimum_amount' => $minimum_value_error)));
     }
   }
-  // Check access maximum
+  // Check access maximum.
   if (user_access('access maximum')) {
     if ($maximum_value > 0 && $total > $maximum_value) {
       form_set_error('order', t('This store requires maximum order of !maximum_amount.', array('!maximum_amount' => $maximum_value_error)));
@@ -198,7 +200,6 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
  * Format amount.
  */
 function commerce_moa_format_amount($amount, $currency_code, $use_custom_currency_format) {
-  $result;
   if ($use_custom_currency_format) {
     $currency = commerce_currency_load($currency_code);
     $result = number_format($amount, $currency['decimals'], $currency['decimal_separator'], $currency['thousands_separator']) . ' ' . $currency_code;
