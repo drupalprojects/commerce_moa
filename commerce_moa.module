@@ -46,7 +46,6 @@ function commerce_moa_permission() {
 
 /**
  * Builds the minimum order amount settings form.
- * 
  */
 function commerce_moa_settings_form($form, &$form_state) {
   $form = array();
