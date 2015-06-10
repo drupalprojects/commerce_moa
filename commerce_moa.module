@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Store the logic of Commerce MOA module.
+ */
 
 /**
  * Implements hook_menu().
@@ -42,6 +46,7 @@ function commerce_moa_permission() {
 
 /**
  * Builds the minimum order amount settings form.
+ * 
  */
 function commerce_moa_settings_form($form, &$form_state) {
   $form = array();
@@ -85,7 +90,7 @@ function commerce_moa_settings_form($form, &$form_state) {
 }
 
 /**
- * Validate the settings form
+ * Validate the settings form.
  */
 function commerce_moa_settings_form_validate($form, &$form_state) {
   $maximum_value = (float) $form_state['values']['commerce_maximum_order_amount'];
@@ -101,28 +106,28 @@ function commerce_moa_settings_form_validate($form, &$form_state) {
 }
 
 /**
- * Return default minimum order amount value, if set is 0 then disable
+ * Return default minimum order amount value, if set is 0 then disable.
  */
 function commerce_moa_default_minimum() {
   return variable_get('commerce_minimum_order_amount', 0);
 }
 
 /**
- * Return default maximum order amount value, if set is 0 then disable
+ * Return default maximum order amount value, if set is 0 then disable.
  */
 function commerce_moa_default_maximum() {
   return variable_get('commerce_maximum_order_amount', 0);
 }
 
 /**
- * Return default maximum order amount value, if set is 0 then disable
+ * Return default maximum order amount value, if set is 0 then disable.
  */
 function commerce_moa_default_quantity() {
   return variable_get('commerce_minimum_order_quantity', 0);
 }
 
 /**
- * Return default maximum order amount value, if set is 0 then disable
+ * Return default maximum order amount value, if set is 0 then disable.
  */
 function commerce_moa_currency_format() {
   return variable_get('commerce_minimum_currency_format', 1);
@@ -148,7 +153,7 @@ function commerce_moa_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * The validate when direct access to checkout page
+ * The validate when direct access to checkout page.
  */
 function commerce_moa_checkout_form_validate($form, &$form_state) {
   $order = commerce_order_load($form_state['order']->order_id);
@@ -162,12 +167,12 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
   $minimum_value_error = commerce_moa_format_amount($minimum_value, $balance['currency_code'], $use_custom_currency_format);
   $maximum_value_error = commerce_moa_format_amount($maximum_value, $balance['currency_code'], $use_custom_currency_format);
 
-  // Check access quantity
+  // Check access quantity.
   if (user_access('access quantity')) {
     if ($minimum_quantity > 0) {
       $order_wrapper = entity_metadata_wrapper('commerce_order', $form_state['order']);
       $order_wrapper->commerce_line_items;
-      foreach ($order_wrapper->commerce_line_items as $index => $line_item_wrapper) {
+      foreach ($order_wrapper->commerce_line_items as $line_item_wrapper) {
         // Don't check quantity for shipping line item.
         $is_product = in_array($line_item_wrapper->type->value(), commerce_product_line_item_types());
         if ($is_product && intval($line_item_wrapper->quantity->value()) < $minimum_quantity) {
@@ -190,6 +195,9 @@ function commerce_moa_checkout_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Format amount.
+ */
 function commerce_moa_format_amount($amount, $currency_code, $use_custom_currency_format) {
   $result;
   if ($use_custom_currency_format) {

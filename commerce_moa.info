@@ -3,6 +3,4 @@ description = Allow set minimum & maximum order amount in cart
 package = Commerce (contrib)
 core = 7.x
 
-files[] = commerce_moa.module
-
 dependencies[] = commerce_cart
