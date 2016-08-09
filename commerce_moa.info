@@ -1,5 +1,5 @@
-name = Commerce Minimum & Maximum Order Amount
-description = Allow set minimum & maximum order amount in cart
+name = Commerce Minimum & Maximum Order Amount Per Role
+description = Allow set minimum & maximum order amount in cart per role
 package = Commerce (contrib)
 core = 7.x
 
